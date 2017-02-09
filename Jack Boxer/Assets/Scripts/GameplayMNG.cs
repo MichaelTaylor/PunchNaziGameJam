@@ -7,6 +7,9 @@ public class GameplayMNG : MonoBehaviour {
 
     public PlayerScript Player;
     public Image JumpForceImage;
+    public AudioClip [] BGMTracks;
+
+    private AudioSource audioSource;
 
 	// Use this for initialization
 	void Start ()
@@ -17,6 +20,7 @@ public class GameplayMNG : MonoBehaviour {
 	void GetProperties()
     {
         Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerScript>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void UIChecker()
@@ -28,4 +32,10 @@ public class GameplayMNG : MonoBehaviour {
     {
         UIChecker();
 	}
+
+    public void PlayBGMAudio(AudioClip NewBGM)
+    {
+        audioSource.clip = NewBGM;
+        audioSource.Play();
+    }
 }
