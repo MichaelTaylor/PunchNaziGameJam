@@ -25,6 +25,8 @@ public class EnemyScript : MonoBehaviour {
     public float MoveTimer;
     public float ResetShootTimer;
 
+    [Header("Gameplay Variables")]
+    private GameplayMNG GamePlayManager;
     private Rigidbody2D RB2D;
 
     public EnemyStates States;
@@ -52,6 +54,7 @@ public class EnemyScript : MonoBehaviour {
 
     void GetProperties()
     {
+        GamePlayManager = GameObject.FindObjectOfType<GameplayMNG>();
         RB2D = GetComponent<Rigidbody2D>();
     }
 	
@@ -159,6 +162,20 @@ public class EnemyScript : MonoBehaviour {
         {
             States = EnemyStates.Moving;
         }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "Player")
+        {
+            DeathFunction();
+        }
+    }
+
+    void DeathFunction()
+    {
+        Destroy(gameObject);
+        GamePlayManager.PlaySFX(Player.GetComponent<PlayerScript>().GloveSFX[1]);
     }
 
     private float AllPurposeTimer(float Timer)

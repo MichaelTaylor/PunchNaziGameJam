@@ -21,6 +21,13 @@ public class PlayerScript : MonoBehaviour {
     [Header("Various Timers")]
     public float AttackTimer;
 
+    [Header("Sound Variables")]
+    public AudioSource audiosource;
+    public AudioClip[] GloveSFX;
+    public AudioClip[] JumpSFX;
+
+    [Header("Gameplay Variables")]
+    private GameplayMNG GamePlayManager;
     private Rigidbody2D RB2D;
 
     void Start()
@@ -37,6 +44,7 @@ public class PlayerScript : MonoBehaviour {
 
     void GetProperties()
     {
+        GamePlayManager = GameObject.FindObjectOfType<GameplayMNG>();
         RB2D = GetComponent<Rigidbody2D>();
     }
 
@@ -52,17 +60,46 @@ public class PlayerScript : MonoBehaviour {
         BoolCheckers();
         CharacterMovement(xAxis);
         JumpAttacking();
-        if (Input.GetButton("Fire1")) SideAttacking();
+        AttackControls();
     }
 
     void CharacterMovement(float dir)
     {
         RB2D.velocity = new Vector2(dir * Speed, RB2D.velocity.y);
         ScaleChecker();
-        if (Input.GetButton("Jump")) ChargeJump();
-        if (Input.GetButtonUp("Jump")) Jump();
+        JumpControls();
     }
 
+    void AttackControls()
+    {
+        if (Input.GetButton("Fire1")) SideAttacking();
+        if (Input.GetButtonDown("Fire1")) GamePlayManager.PlaySFX(GloveSFX[0]);
+    }
+
+    void JumpControls()
+    {
+        if (Input.GetButton("Jump")) ChargeJump();
+        if (Input.GetButtonUp("Jump")) Jump();
+        if (Input.GetButtonDown("Jump")) GamePlayManager.PlaySFX(JumpSFX[0]);
+    }
+
+    void ChargeJump()
+    {
+        if (IsGrounded)
+        {
+            JumpForce += JumpEscalation * Time.deltaTime;
+            if (JumpForce > MaxJumpForce) JumpForce = MaxJumpForce;
+        }
+    }
+
+    void Jump()
+    {
+        RB2D.velocity = new Vector2(RB2D.velocity.x, JumpForce);
+        IsGrounded = false;
+        ResetVariables();
+        GamePlayManager.PlaySFX(JumpSFX[1]);
+    }
+    
     void SideAttacking()
     {      
         if (IsAttacking)
@@ -141,22 +178,6 @@ public class PlayerScript : MonoBehaviour {
         Gizmos.DrawSphere(new Vector2(transform.position.x, transform.position.y - 0.5f), 0.25f);
     }
 
-    void ChargeJump()
-    {
-        if (IsGrounded)
-        {
-            JumpForce += JumpEscalation * Time.deltaTime;
-            if (JumpForce > MaxJumpForce) JumpForce = MaxJumpForce;
-        }
-    }
-
-    void Jump()
-    {
-        RB2D.velocity = new Vector2(RB2D.velocity.x, JumpForce);
-        IsGrounded = false;
-        ResetVariables();
-    }
-
     void ResetVariables()
     {
         JumpForce = 0f;
@@ -168,6 +189,15 @@ public class PlayerScript : MonoBehaviour {
         SideAttack.SetActive(false);
     }
 
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.tag == "EnemyBullet")
+        {
+            Destroy(other.gameObject);
+            DeathFunction();
+        }
+    }
+
     private float AllPurposeTimer(float Timer)
     {
         return Timer += Time.deltaTime * 1f;
@@ -175,6 +205,6 @@ public class PlayerScript : MonoBehaviour {
 
     public void DeathFunction()
     {
-        
+        GamePlayManager.GameOver();
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameplayMNG : MonoBehaviour {
 
@@ -9,22 +10,25 @@ public class GameplayMNG : MonoBehaviour {
     public Image JumpForceImage;
     public AudioClip [] BGMTracks;
 
-    private AudioSource audioSource;
+    public AudioSource BGMaudioSource;
+    public AudioSource SFXaudioSource;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start ()
     {
+        DontDestroyOnLoad(gameObject);
         GetProperties();
 	}
 	
 	void GetProperties()
     {
         Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerScript>();
-        audioSource = GetComponent<AudioSource>();
+        BGMaudioSource = GetComponent<AudioSource>();
     }
 
     void UIChecker()
     {
+        if (JumpForceImage != null)
         JumpForceImage.fillAmount = Player.JumpForce / Player.MaxJumpForce;
     }
 
@@ -33,9 +37,21 @@ public class GameplayMNG : MonoBehaviour {
         UIChecker();
 	}
 
-    public void PlayBGMAudio(AudioClip NewBGM)
+    public void PlaySFX(AudioClip SFXtoPlay)
     {
-        audioSource.clip = NewBGM;
-        audioSource.Play();
+        SFXaudioSource.clip = SFXtoPlay;
+        SFXaudioSource.Play();
+    }
+
+    public void PlayBGM(AudioClip NewBGM)
+    {
+        BGMaudioSource.clip = NewBGM;
+        BGMaudioSource.Play();
+    }
+
+    public void GameOver()
+    {
+        PlayBGM(BGMTracks[1]);
+        SceneManager.LoadScene("GameOver");
     }
 }
