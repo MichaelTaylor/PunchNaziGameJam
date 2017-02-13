@@ -7,7 +7,7 @@ public class EnemyScript : MonoBehaviour {
     [Header("General Variables")]
     public float Speed;
     public bool MovingLeft;
-    private GameObject Player;
+    public Transform VisiblityStart;
     public Transform VisiblityLimit;
     public bool Alerted;
 
@@ -26,6 +26,7 @@ public class EnemyScript : MonoBehaviour {
     public float ResetShootTimer;
 
     [Header("Gameplay Variables")]
+    private PlayerScript Player;
     private GameplayMNG GamePlayManager;
     private Rigidbody2D RB2D;
 
@@ -48,7 +49,7 @@ public class EnemyScript : MonoBehaviour {
     void GetVariables()
     {
         StartingPoint = transform.position;
-        Player = GameObject.FindGameObjectWithTag("Player");
+        Player = GameObject.FindObjectOfType<PlayerScript>();
         CanShoot = true;
     }
 
@@ -68,7 +69,7 @@ public class EnemyScript : MonoBehaviour {
     void DetectPlayer()
     {
         Alerted = Physics2D.Linecast(transform.position, VisiblityLimit.position, 1 << LayerMask.NameToLayer("Player"));
-        Debug.DrawLine(transform.position, VisiblityLimit.position, Color.green);
+        Debug.DrawLine(VisiblityStart.position, VisiblityLimit.position, Color.green);
 
         if (Alerted)
         {
@@ -156,6 +157,7 @@ public class EnemyScript : MonoBehaviour {
                 NewBullet.GetComponent<Rigidbody2D>().AddForce((Player.transform.position - transform.position) * BulletForce, ForceMode2D.Impulse);
                 Destroy(NewBullet, 2f);
                 CanShoot = false;
+                Invoke("ResetStates", 0.75f);
             }
         }
         else
@@ -172,10 +174,16 @@ public class EnemyScript : MonoBehaviour {
         }
     }
 
+    void ResetStates()
+    {
+        CanShoot = true;
+    }
+
     void DeathFunction()
     {
-        Destroy(gameObject);
-        GamePlayManager.PlaySFX(Player.GetComponent<PlayerScript>().GloveSFX[1]);
+        GamePlayManager.NumberOfEnemies -= 1;
+        GamePlayManager.PlaySFX(Player.GloveSFX[1]);
+        Destroy(gameObject); 
     }
 
     private float AllPurposeTimer(float Timer)

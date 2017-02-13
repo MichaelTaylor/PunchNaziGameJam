@@ -9,20 +9,22 @@ public class GameplayMNG : MonoBehaviour {
     public PlayerScript Player;
     public Image JumpForceImage;
     public AudioClip [] BGMTracks;
-
+    public int NumberOfEnemies;
     public AudioSource BGMaudioSource;
     public AudioSource SFXaudioSource;
 
     // Use this for initialization
     void Start ()
     {
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
         GetProperties();
 	}
 	
 	void GetProperties()
     {
-        Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerScript>();
+        if (Player != null)
+        Player = GameObject.FindObjectOfType<PlayerScript>();
+        JumpForceImage = GameObject.FindObjectOfType<Image>();
         BGMaudioSource = GetComponent<AudioSource>();
     }
 
@@ -35,7 +37,16 @@ public class GameplayMNG : MonoBehaviour {
 	void Update ()
     {
         UIChecker();
+        VictoryChecker();
 	}
+
+    void VictoryChecker()
+    {
+        if (NumberOfEnemies <= 0)
+        {
+            SceneManager.LoadScene("VictoryScene");
+        }
+    }
 
     public void PlaySFX(AudioClip SFXtoPlay)
     {
@@ -51,7 +62,7 @@ public class GameplayMNG : MonoBehaviour {
 
     public void GameOver()
     {
-        PlayBGM(BGMTracks[1]);
+        //PlayBGM(BGMTracks[1]);
         SceneManager.LoadScene("GameOver");
     }
 }
